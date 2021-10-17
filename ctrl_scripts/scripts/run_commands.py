@@ -25,6 +25,7 @@ key_user = 'user'
 key_ssh_key = 'key'
 key_system = 'target_system'
 key_sr = 'sharing ratio'
+key_linked_list = 'linked list'
 key_rwr = 'rw ratio'
 key_repo_url = 'git url'
 key_node_num = 'node num'
@@ -228,13 +229,18 @@ def build_vm_update_mind_command(server_ip, s_user, s_key, vm_ctrl_ip, v_user, v
                                   vm_ctrl_ip, v_user, v_key,
                                   script_dir, "v_init.sh")
 
-
 def build_vm_sharing_ratio_command(server_ip, s_user, s_key, vm_ctrl_ip, v_user, v_key,
                                    script_dir, node_id=0, sharing_ratio=0, rw_ratio=0, node_num=1):
     return build_vm_brick_command(server_ip, s_user, s_key,
                                   vm_ctrl_ip, v_user, v_key, script_dir,
                                   "v_03a_run_sharing_ratio.sh "
                                   + str(node_id) + " " + str(sharing_ratio) + " " + str(rw_ratio) + " " + str(node_num))
+
+def build_vm_linked_list_command(server_ip, s_user, s_key, vm_ctrl_ip, v_user, v_key,
+                                   script_dir):
+    return build_vm_brick_command(server_ip, s_user, s_key,
+                                  vm_ctrl_ip, v_user, v_key,
+                                  script_dir, "v_linked_list.sh")
 
 
 def build_vm_latency_prepare_command(server_ip, s_user, s_key, vm_ctrl_ip, v_user, v_key,
@@ -646,6 +652,14 @@ def run_on_all_vms(cfg, job="dummy", job_args=None, verbose=True, per_command_de
                             cmd = build_server_dir_download(server[key_ip], s_user_id, s_ssh_key,
                                                              vm[key_ip], v_user_id, v_ssh_key,
                                                              job_args[key_remote], job_args[key_local])
+                    elif job == "linked_list":
+                        if (job_args is not None) and (key_linked_list in job_args)\
+                            and (key_rwr in job_args) and (key_node_num in job_args):
+                            if int(vm[key_id]) < int(job_args[key_node_num]):
+                                cmd = build_vm_sharing_ratio_command(server[key_ip], s_user_id, s_ssh_key,
+                                                                    vm[key_ip], v_user_id, v_ssh_key, script_root,
+                                                                    vm[key_id], job_args[key_sr], job_args[key_rwr],
+                                                                    job_args[key_node_num])
                     else:
                         break   # out of this for loop
 
