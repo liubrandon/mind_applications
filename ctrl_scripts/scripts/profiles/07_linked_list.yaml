@@ -6,6 +6,16 @@
   per_command_delay: 1
   post_delay: 60
 
+- name: restart and reset VMs
+  job: reset
+  per_command_delay: 0
+  post_delay: 60
+
+- name: initialize VMs
+  job: init
+  per_command_delay: 10
+  post_delay: 30
+
 # = Run test =
 - name: run linked list test
   job: linked_list
