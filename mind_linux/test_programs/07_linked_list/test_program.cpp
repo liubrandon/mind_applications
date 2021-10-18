@@ -26,6 +26,7 @@ void *localNextFunc(void * ptr) {
 int main() {
 	backend_t mode = PAGING;
 	int remote_flag = mode != PAGING;
+    printf("remote flag: %d", remote_flag);
     Node* list = (Node*)allocate(remote_flag);
     int i;
 	char data[DATA_SIZE] = "Hello world";
@@ -36,7 +37,7 @@ int main() {
     }
 	struct timeval t;
 	measure_time_start(&t);
-    void* ret = Chase((void*)&list[0], localEndFunc, localNextFunc, mode); // This becomes PAGING
+    void* ret = Chase((void*)&list[0], localEndFunc, localNextFunc, mode);
 	unsigned long duration = measure_time_end(&t);
 	printf("Time total (μs) to perform pointer chasing: %lu\n", duration);
 	printf("Time per chase (μs): %f\n", (double)duration/(double)NUM_NODES);
