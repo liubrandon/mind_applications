@@ -24,7 +24,7 @@ void *localNextFunc(void * ptr) {
 }
 
 int main() {
-	backend_t mode = LOCAL;
+	backend_t mode = PAGING;
 	int remote_flag = mode != PAGING;
     Node* list = (Node*)allocate(remote_flag);
     int i;
