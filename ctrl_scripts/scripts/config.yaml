@@ -6,7 +6,7 @@
 
 # This is an example configuration that we used for our cluster
 default:
-  script root: ~/mind/ctrl_scripts/
+  script root: ~/mind_applications/ctrl_scripts/
   user: sosp_ae
   key: ~/.ssh/vmhost_acc
   cluster gw: 10.10.10.0

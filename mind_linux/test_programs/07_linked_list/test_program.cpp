@@ -1,42 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/mman.h>
 #include <stdint.h>
-
-#define TEST_MACRO_ALLOC_SIZE (8 * 1024 * 1024 * 1024UL)  // 8 GB
-#define TEST_ALLOC_FLAG 0xfe
+#include "mind.h"
+#include "local.h"
+#include "chase.h"
 
 #define DATA_SIZE 4000
 #define NUM_NODES 10
 typedef struct node {
-	char data[DATA_SIZE];
-	node* next;
-} node_t;
+    char data[DATA_SIZE];
+	int num;
+    node* next;
+} Node;
 
-void append(node_t* head, char data[]) {
-    node_t* current = head;
-    while (current->next != NULL) {
-        current = current->next;
-    }
-    current->next = (node_t*)((uintptr_t)current + 4008);
-	for(int i = 0; i < DATA_SIZE; i++) {
-		current->next->data[i] = data[i];
-	}
-    current->next->next = NULL;
+bool localEndFunc (void *ptr) {
+    return ((Node*)ptr)->num == NUM_NODES;
 }
 
-int main(int argc, char **argv) {
-	char *data_buf = (char *)mmap(NULL, TEST_MACRO_ALLOC_SIZE, PROT_READ | PROT_WRITE, TEST_ALLOC_FLAG, -1, 0);
-	node_t* head = (node_t*) data_buf;
-	head->next = NULL;
-	char data[DATA_SIZE] = "Hello world.";
-	for (int i = 0; i < NUM_NODES; i++) {
-		append(head, data);
-	}
-	node_t* curr = head;
-	while (curr != NULL) {
-		printf("%s\n", curr->data);
-		curr = curr->next;
-	}
-	return 0;
+void *localNextFunc(void * ptr) {
+	Node* curr = (Node*)ptr;
+    printf("#%d: %s\n", curr->num, curr->data);
+    return (void*)curr->next;
+}
+
+int main() {
+	backend_t mode = LOCAL;
+	int remote_flag = mode != PAGING;
+    Node* list = (Node*)allocate(remote_flag);
+    int i;
+	char data[DATA_SIZE] = "Hello world";
+    for (i = 0; i < NUM_NODES; i++) {
+        memcpy((void*)list[i].data, data, DATA_SIZE);
+		list[i].num = i+1;
+        list[i].next = &list[i+1];
+    }
+	struct timeval t;
+	measure_time_start(&t);
+    void* ret = Chase((void*)&list[0], localEndFunc, localNextFunc, mode); // This becomes PAGING
+	unsigned long duration = measure_time_end(&t);
+	printf("Time total (μs) to perform pointer chasing: %lu\n", duration);
+	printf("Time per chase (μs): %f\n", (double)duration/(double)NUM_NODES);
+    assert(((Node*)ret)->num == NUM_NODES);
+    deallocate(remote_flag, (char*)list);
+    return 0;
 }

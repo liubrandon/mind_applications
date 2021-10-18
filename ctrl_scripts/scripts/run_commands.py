@@ -43,7 +43,7 @@ key_owner = 'data_onwer'
 key_dir_1 = 'dir_1'
 key_dir_2 = 'dir_2'
 dir_receipes = '/recipes'
-dir_bricks = '/bricks'
+dir_bricks = 'bricks'
 mem_blade_id_start = 16
 
 app_name_map = {
@@ -238,9 +238,10 @@ def build_vm_sharing_ratio_command(server_ip, s_user, s_key, vm_ctrl_ip, v_user,
 
 def build_vm_linked_list_command(server_ip, s_user, s_key, vm_ctrl_ip, v_user, v_key,
                                    script_dir):
-    return build_vm_brick_command(server_ip, s_user, s_key,
+    cmd = build_vm_brick_command(server_ip, s_user, s_key,
                                   vm_ctrl_ip, v_user, v_key,
                                   script_dir, "v_linked_list.sh")
+    return cmd
 
 
 def build_vm_latency_prepare_command(server_ip, s_user, s_key, vm_ctrl_ip, v_user, v_key,
@@ -653,13 +654,8 @@ def run_on_all_vms(cfg, job="dummy", job_args=None, verbose=True, per_command_de
                                                              vm[key_ip], v_user_id, v_ssh_key,
                                                              job_args[key_remote], job_args[key_local])
                     elif job == "linked_list":
-                        if (job_args is not None) and (key_linked_list in job_args)\
-                            and (key_rwr in job_args) and (key_node_num in job_args):
-                            if int(vm[key_id]) < int(job_args[key_node_num]):
-                                cmd = build_vm_sharing_ratio_command(server[key_ip], s_user_id, s_ssh_key,
-                                                                    vm[key_ip], v_user_id, v_ssh_key, script_root,
-                                                                    vm[key_id], job_args[key_sr], job_args[key_rwr],
-                                                                    job_args[key_node_num])
+                        cmd = build_vm_linked_list_command(server[key_ip], s_user_id, s_ssh_key,
+                                                           vm[key_ip], v_user_id, v_ssh_key, script_root)
                     else:
                         break   # out of this for loop
 
