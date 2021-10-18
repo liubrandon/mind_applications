@@ -14,6 +14,7 @@ typedef struct node {
 } Node;
 
 bool localEndFunc (void *ptr) {
+    printf("#%d: %s (END)\n", curr->num, curr->data);
     return ((Node*)ptr)->num == NUM_NODES;
 }
 

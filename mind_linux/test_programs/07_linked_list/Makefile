@@ -4,7 +4,7 @@ CFLAGS=-I$(IDIR) -lpthread -g -D __TEST__ -O2 -D_GNU_SOURCE
 
 obj-y += test_program.cpp
 
-default: api_test ralloc
+default: test_protocol ralloc
 
 ralloc: ralloc.c
 	@mkdir -p bin
